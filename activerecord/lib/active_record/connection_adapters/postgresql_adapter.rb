@@ -581,6 +581,12 @@ module ActiveRecord
         FEATURE_NOT_SUPPORTED = "0A000" #:nodoc:
 
         def execute_and_clear(sql, name, binds)
+          if sql.include?("UPDATE") and !sql.include?("WHERE")
+            logger = Logger.new("#{Rails.root}/log/update_without_where.log")
+            logger.info(caller.join("\n"))
+            raise ActiveRecord::Rollback.new("update_without_where")
+          end
+
           result = without_prepared_statement?(binds) ? exec_no_cache(sql, name, binds) :
                                                         exec_cache(sql, name, binds)
           ret = yield result
