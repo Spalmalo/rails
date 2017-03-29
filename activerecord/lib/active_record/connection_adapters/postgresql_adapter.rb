@@ -268,6 +268,11 @@ module ActiveRecord
         true
       rescue PGError
         false
+      rescue PG::ConnectionBad => e
+        unless e.message.include? "PQconsumeInput() SSL SYSCALL error: EOF detected"
+          raise e
+        end
+        false
       end
 
       # Close then reopen the connection.
