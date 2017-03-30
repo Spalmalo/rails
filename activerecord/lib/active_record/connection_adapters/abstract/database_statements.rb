@@ -111,6 +111,8 @@ module ActiveRecord
 
       # Executes the update statement and returns the number of rows affected.
       def update(arel, name = nil, binds = [])
+        logger = Logger.new("#{Rails.root}/log/database_statement_update.log")
+        logger.info("sql: #{to_sql(arel, binds)} | arel: #{arel.inspect} | binds: #{binds.inspect}")
         exec_update(to_sql(arel, binds), name, binds)
       end
 

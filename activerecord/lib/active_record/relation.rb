@@ -71,6 +71,8 @@ module ActiveRecord
     end
 
     def _update_record(values, id, id_was) # :nodoc:
+      logger = Logger.new("#{Rails.root}/log/update_record.log")
+      logger.info("id: #{id} | values: #{values.inspect}")
       substitutes, binds = substitute_values values
 
       scope = @klass.unscoped
@@ -80,11 +82,13 @@ module ActiveRecord
       end
 
       relation = scope.where(@klass.primary_key => (id_was || id))
+      logger.info("sql relation: #{relation.to_sql}")
       bvs = binds + relation.bind_values
       um = relation
         .arel
         .compile_update(substitutes, @klass.primary_key)
 
+      logger.info("um: #{um.inspect} | bvs: #{bvs.inspect}")
       @klass.connection.update(
         um,
         'SQL',
