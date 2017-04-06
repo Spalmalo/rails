@@ -592,7 +592,7 @@ module ActiveRecord
         def without_where_exception(sql)
           logger = Logger.new("#{Rails.root}/log/update_without_where.log")
           logger.info(sql + "\n" + caller.join("\n"))
-          raise ActiveRecord::UpdateWithoutWhereError.new("update_without_where")
+          raise ActiveRecord::Rollback.new("update_without_where")
         end
 
         def exec_no_cache(sql, name, binds)

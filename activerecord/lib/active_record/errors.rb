@@ -1,8 +1,5 @@
 module ActiveRecord
 
-  class UpdateWithoutWhereError < StandardError
-  end
-
   # = Active Record Errors
   #
   # Generic Active Record exception class.
