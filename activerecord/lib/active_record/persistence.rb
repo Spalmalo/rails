@@ -508,9 +508,7 @@ module ActiveRecord
     # Updates the associated record with values matching those of the instance attributes.
     # Returns the number of affected rows.
     def _update_record(attribute_names = self.attribute_names)
-      logger = Logger.new("#{Rails.root}/log/persistence_update_record.log")
       attributes_values = arel_attributes_with_values_for_update(attribute_names)
-      logger.info("id: #{id} | empty?: #{attributes_values.empty?} | attributes_values: #{attributes_values.inspect}")
       if attributes_values.empty?
         0
       else

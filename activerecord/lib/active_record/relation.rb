@@ -71,8 +71,6 @@ module ActiveRecord
     end
 
     def _update_record(values, id, id_was) # :nodoc:
-      logger = Logger.new("#{Rails.root}/log/update_record.log")
-      logger.info("id: #{id} | values: #{values.inspect}")
       substitutes, binds = substitute_values values
 
       scope = @klass.unscoped
@@ -82,19 +80,27 @@ module ActiveRecord
       end
 
       relation = scope.where(@klass.primary_key => (id_was || id))
-      logger.info("sql relation: #{relation.to_sql}")
+      logger = Logger.new("#{Rails.root}/log/update_record.log")
+      logger.formatter = proc do |severity, time, program_name, message|
+        context = begin
+          c = Thread.current[:sidekiq_context]
+          " #{c.join(' '.freeze)}" if c && c.any?
+        end
+        "#{time.utc.iso8601(3)} ##{::Process.pid} TID-#{Thread.current.object_id.to_s(36)}#{context} #{severity}: #{message}\n"
+      end
+      logger.info("id: #{id} | id_was: #{id_was} | values: #{values.inspect} | sql relation: #{relation.to_sql} | primary_key: #{@klass.primary_key} | primary_key_class: #{@klass.primary_key.class}")
       bvs = binds + relation.bind_values
       um = relation
         .arel
         .compile_update(substitutes, @klass.primary_key)
 
-      logger.info("um: #{um.inspect} | bvs: #{bvs.inspect}")
       @klass.connection.update(
         um,
         'SQL',
         bvs,
       )
     end
+
 
     def substitute_values(values) # :nodoc:
       binds = values.map do |arel_attr, value|

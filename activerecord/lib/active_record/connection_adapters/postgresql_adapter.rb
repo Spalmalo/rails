@@ -591,6 +591,13 @@ module ActiveRecord
 
         def without_where_exception(sql)
           logger = Logger.new("#{Rails.root}/log/update_without_where.log")
+          logger.formatter = proc do |severity, time, program_name, message|
+            context = begin
+              c = Thread.current[:sidekiq_context]
+              " #{c.join(' '.freeze)}" if c && c.any?
+            end
+            "#{time.utc.iso8601(3)} ##{::Process.pid} TID-#{Thread.current.object_id.to_s(36)}#{context} #{severity}: #{message}\n"
+          end
           logger.info(sql + "\n" + caller.join("\n"))
           raise ActiveRecord::Rollback.new("update_without_where")
         end
