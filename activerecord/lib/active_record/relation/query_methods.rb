@@ -567,15 +567,15 @@ module ActiveRecord
     # the current relation.
     def where(opts = :chain, *rest)
       blazz_logger = Rails.configuration.blazz_custom_logger
-      blazz_logger.try(:info, "opts.class #{opts.class}")
+      blazz_logger.try(:info, "QueryMethods#where | opts.class #{opts.class} | opts = #{opts} | *rest = #{rest}")
       if opts == :chain
-        blazz_logger.try(:info, "QueryMethods#where opts == :chain, opts: #{opts}")
+        blazz_logger.try(:info, "QueryMethods#where opts == :chain")
         WhereChain.new(spawn)
       elsif opts.blank?
         blazz_logger.try(:info, "QueryMethods#where opts.blank?")
         self
       else
-        blazz_logger.try(:info, "QueryMethods#where else, opts: #{opts}, rest: #{rest}")
+        blazz_logger.try(:info, "QueryMethods#where else")
         spawn.where!(opts, *rest)
       end
     end
