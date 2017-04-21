@@ -566,17 +566,25 @@ module ActiveRecord
     # If the condition is any blank-ish object, then #where is a no-op and returns
     # the current relation.
     def where(opts = :chain, *rest)
+      blazz_logger = Rails.configuration.blazz_custom_logger
+      blazz_logger.try(:info, "opts.class #{opts.class}")
       if opts == :chain
+        blazz_logger.try(:info, "QueryMethods#where opts == :chain, opts: #{opts}")
         WhereChain.new(spawn)
       elsif opts.blank?
+        blazz_logger.try(:info, "QueryMethods#where opts.blank?")
         self
       else
+        blazz_logger.try(:info, "QueryMethods#where else, opts: #{opts}, rest: #{rest}")
         spawn.where!(opts, *rest)
       end
     end
 
     def where!(opts, *rest) # :nodoc:
+      blazz_logger = Rails.configuration.blazz_custom_logger
+      blazz_logger.try(:info, "QueryMethods#where! opts: #{opts}, rest: #{rest}")
       if Hash === opts
+        blazz_logger.try(:info, "QueryMethods#where! opts === Hash")
         opts = sanitize_forbidden_attributes(opts)
         references!(PredicateBuilder.references(opts))
       end
