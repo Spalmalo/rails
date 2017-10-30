@@ -80,16 +80,6 @@ module ActiveRecord
       end
 
       relation = scope.where(@klass.primary_key => (id_was || id))
-
-      blazz_logger = Rails.configuration.blazz_custom_logger
-      blazz_logger.try(:info, "id: #{id} | id_was: #{id_was} | values: #{values.inspect} | sql relation: #{relation.to_sql} | primary_key: #{@klass.primary_key} | primary_key_class: #{@klass.primary_key.class}")
-
-
-      if !relation.to_sql.include?('WHERE')
-        blazz_logger.try(:info, "Rollback exception sql: #{relation.to_sql}")
-        raise ActiveRecord::Rollback.new("update_without_where")
-      end
-
       bvs = binds + relation.bind_values
       um = relation
         .arel
@@ -101,7 +91,6 @@ module ActiveRecord
         bvs,
       )
     end
-
 
     def substitute_values(values) # :nodoc:
       binds = values.map do |arel_attr, value|

@@ -581,6 +581,13 @@ module ActiveRecord
         FEATURE_NOT_SUPPORTED = "0A000" #:nodoc:
 
         def execute_and_clear(sql, name, binds)
+          if sql.include?("UPDATE") and !sql.include?("WHERE")
+            blazz_logger = Rails.configuration.blazz_custom_logger
+            blazz_logger.try(:info, caller.join("\n"))
+            blazz_logger.try(:info, "execute_and_clear | sql = #{sql} | name = #{name} | binds = #{binds}")
+            raise ActiveRecord::Rollback.new("update_without_where")
+          end
+
           result = without_prepared_statement?(binds) ? exec_no_cache(sql, name, binds) :
                                                         exec_cache(sql, name, binds)
           ret = yield result
